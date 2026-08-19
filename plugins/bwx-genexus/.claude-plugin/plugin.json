@@ -1,0 +1,8 @@
+{
+  "name": "bwx-genexus",
+  "description": "Revision de commits de GeneXus: extrae los diffs reales de la KB leyendo la base SQL y audita los objetos completos antes de subirlos a GXserver.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Brokerware"
+  }
+}

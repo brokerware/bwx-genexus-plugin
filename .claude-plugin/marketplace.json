@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bwx",
+  "description": "Plugins internos de Brokerware para trabajar con GeneXus y GXserver",
+  "owner": {
+    "name": "Brokerware"
+  },
+  "plugins": [
+    {
+      "name": "bwx-genexus",
+      "description": "Revision de commits de GeneXus: extrae los diffs reales de la KB leyendo la base SQL y audita los objetos completos antes de subirlos.",
+      "source": "./plugins/bwx-genexus",
+      "category": "development"
+    }
+  ]
+}
