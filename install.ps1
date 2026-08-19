@@ -8,18 +8,15 @@
   ~/.claude/skills, que es donde Claude Code los busca en cualquier instalacion, incluida
   la app de escritorio.
 
-  El repo es privado, asi que la descarga va por git (usa tus credenciales de GitHub).
-  No se puede hacer por raw.githubusercontent.com: sin token devuelve 404.
-
-  Corriendolo de nuevo actualiza a la ultima version.
+  Clona el repo en LOCALAPPDATA la primera vez y lo actualiza en las siguientes, asi que
+  el mismo comando sirve para instalar y para actualizar.
 
 .EXAMPLE
-  # primera vez
-  git clone https://github.com/brokerware/bwx-genexus-plugin.git "$env:LOCALAPPDATA\bwx-genexus-plugin"
-  & "$env:LOCALAPPDATA\bwx-genexus-plugin\install.ps1"
+  # una linea, sin clonar a mano
+  irm https://raw.githubusercontent.com/brokerware/bwx-genexus-plugin/main/install.ps1 | iex
 
-  # actualizar despues
-  & "$env:LOCALAPPDATA\bwx-genexus-plugin\install.ps1"
+  # o desde un clon del repo
+  .\install.ps1
 
 .PARAMETER NoPull
   No intenta actualizar el clon antes de copiar. Util cuando estas desarrollando el
@@ -81,9 +78,8 @@ if ($localSkills -and (Test-Path $localSkills)) {
       Fail @"
 No pude clonar $Repo
 
-El repo es privado. Verifica que:
-  - tengas acceso a la organizacion brokerware en GitHub
-  - git tenga tus credenciales (probar: git ls-remote $Repo)
+Probar el acceso con:  git ls-remote $Repo
+Si eso falla, es de red o de proxy, no del plugin.
 
 Detalle: $($c.Output)
 "@

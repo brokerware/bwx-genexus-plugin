@@ -14,32 +14,24 @@ ve en el IDE y lo diffea con git.
 
 ### Opcion A: instalador (funciona siempre)
 
-No necesita el CLI de Claude Code, asi que sirve tambien en la app de escritorio. En
-PowerShell:
+No necesita el CLI de Claude Code, asi que sirve tambien en la app de escritorio. Una
+linea en PowerShell:
 
 ```powershell
-git clone https://github.com/brokerware/bwx-genexus-plugin.git "$env:LOCALAPPDATA\bwx-genexus-plugin"
-& "$env:LOCALAPPDATA\bwx-genexus-plugin\install.ps1"
+irm https://raw.githubusercontent.com/brokerware/bwx-genexus-plugin/main/install.ps1 | iex
 ```
 
-Copia los skills a `~/.claude/skills`, que es donde Claude Code los busca en cualquier
-instalacion.
+Clona el repo en `%LOCALAPPDATA%\bwx-genexus-plugin` y copia los skills a
+`~/.claude/skills`, que es donde Claude Code los busca en cualquier instalacion.
 
-Para **actualizar** mas adelante, volve a correr el mismo script: hace `git pull` solo.
+Para **actualizar**, el mismo comando: si ya esta clonado hace `git pull` y recopia.
 
-```powershell
-& "$env:LOCALAPPDATA\bwx-genexus-plugin\install.ps1"
-```
-
-> Va por `git clone` y no por `raw.githubusercontent.com` a proposito: el repo es privado
-> y las URLs raw sin token devuelven 404. Hace falta acceso a la org `brokerware` y git
-> con credenciales de GitHub. Para verificar el acceso antes de instalar:
-> `git ls-remote https://github.com/brokerware/bwx-genexus-plugin.git`
+Requiere `git` en el PATH (que igual hace falta para generar los diffs).
 
 ### Opcion B: mecanismo de plugins
 
-Solo si tenes instalado el **CLI** `claude` (requiere Node 18+). Dentro de la sesion
-interactiva de Claude Code, no en la shell:
+Solo si tenes instalado el **CLI** `claude` (requiere Node 18+). Se tipea dentro de la
+sesion interactiva de Claude Code, **no en la shell**:
 
 ```
 /plugin marketplace add brokerware/bwx-genexus-plugin
