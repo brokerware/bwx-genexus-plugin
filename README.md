@@ -12,10 +12,34 @@ ve en el IDE y lo diffea con git.
 
 ## Instalacion
 
-En Claude Code:
+### Opcion A: instalador (funciona siempre)
+
+Una linea en PowerShell. No necesita el CLI de Claude Code, asi que sirve tambien en la
+app de escritorio:
+
+```powershell
+irm https://raw.githubusercontent.com/brokerware/bwx-genexus-plugin/main/install.ps1 | iex
+```
+
+Copia los skills a `~/.claude/skills`, que es donde Claude Code los busca en cualquier
+instalacion. Corriendolo de nuevo actualiza a la ultima version.
+
+Si ya tenes el repo clonado, desde la carpeta del clon:
+
+```powershell
+.\install.ps1
+```
+
+> El repo es privado: hace falta acceso a la org `brokerware` y tener git configurado con
+> credenciales de GitHub.
+
+### Opcion B: mecanismo de plugins
+
+Solo si tenes instalado el **CLI** `claude` (requiere Node 18+). Dentro de la sesion
+interactiva de Claude Code, no en la shell:
 
 ```
-/plugin marketplace add <url-del-repo>
+/plugin marketplace add brokerware/bwx-genexus-plugin
 /plugin install bwx-genexus@bwx
 ```
 

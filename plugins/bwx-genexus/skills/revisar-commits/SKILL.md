@@ -12,8 +12,14 @@ unificados, el fuente completo, y una auditoria mecanica del objeto.
 
 Solo hace `SELECT`: **no abre la KB ni toma locks**, asi que corre con el IDE abierto.
 
-El script esta en `${CLAUDE_PLUGIN_ROOT}/skills/revisar-commits/scripts/gx-kb.ps1`.
-Invocalo con `powershell -File <ruta> -Action ...`.
+El script es `scripts/gx-kb.ps1`, al lado de este SKILL.md. La ruta depende de como se
+instalo:
+
+- como plugin: `${CLAUDE_PLUGIN_ROOT}/skills/revisar-commits/scripts/gx-kb.ps1`
+- como skill personal: `~/.claude/skills/revisar-commits/scripts/gx-kb.ps1`
+
+Usá la que exista. Invocalo con `powershell -File <ruta> -Action ...`. En los ejemplos de
+abajo aparece como `<script>`.
 
 ## Paso 0: la KB
 

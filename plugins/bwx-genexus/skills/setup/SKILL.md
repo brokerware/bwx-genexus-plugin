@@ -5,6 +5,11 @@ description: Verifica la instalacion del plugin bwx-genexus y el acceso a la bas
 
 # Puesta en marcha de bwx-genexus
 
+`<script>` en los ejemplos es `scripts/gx-kb.ps1` del skill `revisar-commits`. Segun la
+instalacion: `${CLAUDE_PLUGIN_ROOT}/skills/revisar-commits/scripts/gx-kb.ps1` si se
+instalo como plugin, o `~/.claude/skills/revisar-commits/scripts/gx-kb.ps1` si se instalo
+con `install.ps1`.
+
 **Normalmente no hay nada que configurar.** El script encuentra la KB solo, y de la KB
 saca la instancia de SQL Server y el nombre de la base leyendo
 `knowledgebase.connection`. La autenticacion es la integrada de Windows, la misma que usa
@@ -20,7 +25,7 @@ defecto cuando hay varias, y diagnosticar cuando algo falla.
 ## Paso 1: verificar
 
 ```powershell
-powershell -File "${CLAUDE_PLUGIN_ROOT}/skills/revisar-commits/scripts/gx-kb.ps1" -Action doctor
+powershell -File "<script>" -Action doctor
 ```
 
 Chequea PowerShell, git, la resolucion de la KB y la conexion a SQL. Terminá cuando diga
