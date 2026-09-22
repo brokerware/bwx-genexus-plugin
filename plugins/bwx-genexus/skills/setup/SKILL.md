@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Verifica la instalacion del plugin bwx-genexus y el acceso a la base SQL de una KB GeneXus, y fija la KB por defecto. Usar la primera vez que alguien instala el plugin, cuando "BWX revisar commits" no encuentra la KB o apunta a la KB equivocada, o cuando pidan configurar la ruta de la KB o diagnosticar problemas de conexion.
+description: Verifica la instalacion del plugin bwx-genexus y el acceso a la base SQL de una KB GeneXus, y fija la KB por defecto. Usar la primera vez que alguien instala el plugin, cuando "BWX revisar commits" no encuentra la KB o apunta a la KB equivocada, cuando pidan configurar la ruta de la KB o diagnosticar problemas de conexion, o para instalar y diagnosticar el bridge que permite editar objetos (MCP bwx-gx-bridge).
 ---
 
 # Puesta en marcha de bwx-genexus
@@ -77,3 +77,45 @@ powershell -File "<script>" -Action list -LastOps 1
 
 Si lista objetos, quedo funcionando. Decile al usuario que ya puede pedir **"BWX revisar
 commits"** con una captura de la grilla *Pending Commits* o con una lista de nombres.
+
+## Paso 5 (opcional): bridge para editar objetos
+
+Solo si el usuario quiere que Claude **modifique** objetos (skill `editar-kb`). La
+revision de commits no lo necesita.
+
+Son dos piezas:
+
+- **El servidor MCP `bwx-gx-bridge`.** Viene con el plugin: si se instalo con
+  `/plugin install` ya esta; si se instalo con `install.ps1`, ese script lo registra en
+  `~/.claude.json`. Necesita **Node 18+**. Despues de instalarlo hay que reiniciar Claude
+  Code.
+- **La extension del IDE** (`Bwx.GxBridge.dll` en `<GeneXus18>\Packages`). Se instala
+  una vez, con GeneXus cerrado y desde un PowerShell **como administrador**. No la
+  instales vos: dale al usuario el comando para que lo corra el.
+
+  ```powershell
+  & "$env:LOCALAPPDATA\bwx-genexus-plugin\bridge\install-bridge.ps1"
+  ```
+
+  Si instalo con `/plugin install` y no tiene el clon, que corra primero el instalador
+  de una linea con `-NoMcp` (baja el repo sin duplicar el MCP).
+
+  Con el .NET SDK compila el DLL contra el GeneXus de esa maquina; sin SDK lo baja del
+  ultimo Release. Para actualizarlo despues: el mismo script con `-Update`, sin
+  administrador y con GeneXus cerrado.
+
+Verificar, con GeneXus abierto y la KB cargada:
+
+1. `gx_status` → `kbOpen: true`, el nombre de la KB y `version` del bridge.
+2. Si falla: existe `%LOCALAPPDATA%\bwx-gx-bridge\session.json`? Si no, el bridge no
+   arranco: mirar `%LOCALAPPDATA%\bwx-gx-bridge\bridge.log` y confirmar que el DLL esta
+   en `Packages`.
+3. Si existe pero `gx_status` no responde: `bridge\gxb.ps1 ping`. Si ping responde, el
+   bridge esta vivo y el hilo de UI del IDE esta ocupado (dialogo modal, build); en el log
+   tiene que figurar la linea `contexto de UI`.
+
+**Que objetos se pueden modificar** lo decide `WritePrefixes` en
+`%LOCALAPPDATA%\bwx-gx-bridge\config.json`. Por defecto solo `ZZBridge*`, para probar.
+Habilitar mas es decision del usuario: preguntale que prefijos quiere (o `["*"]` para
+toda la KB) y editalo solo si te lo pide. El bridge lee el archivo en cada escritura, no
+hace falta reiniciar el IDE.

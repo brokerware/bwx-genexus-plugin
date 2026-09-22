@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "bwx-genexus",
-      "description": "Revision de commits de GeneXus: extrae los diffs reales de la KB leyendo la base SQL y audita los objetos completos antes de subirlos.",
+      "description": "Revision de commits de GeneXus leyendo la base SQL de la KB, y edicion de objetos a traves del IDE abierto (MCP bwx-gx-bridge).",
       "source": "./plugins/bwx-genexus",
       "category": "development"
     }
