@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Extension de GeneXus 18 que expone la KB abierta en el IDE a un cliente local.
+    Se compila contra los ensamblados de la instalacion; no se copian al output
+    porque el IDE ya los tiene cargados.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>Bwx.GxBridge</AssemblyName>
+    <RootNamespace>Bwx.GxBridge</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>0.2.1</Version>
+    <GxDir Condition="'$(GxDir)' == ''">C:\Program Files (x86)\GeneXus\GeneXus18</GxDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Artech.Architecture.Common"><HintPath>$(GxDir)\Artech.Architecture.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Artech.Architecture.UI.Framework"><HintPath>$(GxDir)\Artech.Architecture.UI.Framework.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Artech.Genexus.Common"><HintPath>$(GxDir)\Artech.Genexus.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Artech.Common"><HintPath>$(GxDir)\Artech.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Artech.Common.Properties"><HintPath>$(GxDir)\Artech.Common.Properties.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Artech.Udm.Framework"><HintPath>$(GxDir)\Artech.Udm.Framework.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+
+</Project>

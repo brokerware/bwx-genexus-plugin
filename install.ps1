@@ -8,6 +8,11 @@
   ~/.claude/skills, que es donde Claude Code los busca en cualquier instalacion, incluida
   la app de escritorio.
 
+  Ademas registra el servidor MCP bwx-gx-bridge (lectura y escritura de objetos a traves
+  del IDE abierto) a nivel usuario en ~/.claude.json. Necesita Node 18+; sin Node se
+  instalan solo los skills. La extension del IDE que el MCP necesita se instala aparte,
+  como administrador, con bridge\install-bridge.ps1.
+
   Clona el repo en LOCALAPPDATA la primera vez y lo actualiza en las siguientes, asi que
   el mismo comando sirve para instalar y para actualizar.
 
@@ -21,12 +26,17 @@
 .PARAMETER NoPull
   No intenta actualizar el clon antes de copiar. Util cuando estas desarrollando el
   plugin y no queres que te toque el working tree.
+
+.PARAMETER NoMcp
+  No registra el servidor MCP. Usarlo si instalaste el plugin con /plugin install, que
+  ya trae el MCP: registrarlo dos veces duplica las herramientas.
 #>
 [CmdletBinding()]
 param(
   [string]$Repo   = 'https://github.com/brokerware/bwx-genexus-plugin.git',
   [string]$Branch = 'main',
-  [switch]$NoPull
+  [switch]$NoPull,
+  [switch]$NoMcp
 )
 
 $ErrorActionPreference = 'Stop'
@@ -106,6 +116,27 @@ if (-not (Test-Path $script)) { Fail 'La copia quedo incompleta: falta gx-kb.ps1
 Write-Host ''
 & $script -Action doctor
 
+# --- MCP bwx-gx-bridge ------------------------------------------------------------------
 Write-Host ''
-Write-Host 'Listo. En Claude Code pedi: "BWX revisar commits"' -ForegroundColor Cyan
+$gxDir = 'C:\Program Files (x86)\GeneXus\GeneXus18'
+$bridgeScript = Join-Path $root 'bridge\install-bridge.ps1'
+if ($NoMcp) {
+  Write-Host 'MCP bwx-gx-bridge: omitido (-NoMcp)' -ForegroundColor DarkGray
+} elseif (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+  Write-Host 'MCP bwx-gx-bridge: falta Node 18+ en el PATH, no lo registro. Los skills de revision funcionan igual.' -ForegroundColor Yellow
+} else {
+  & node (Join-Path $root 'scripts\register-mcp.js') (Join-Path $root 'plugins\bwx-genexus\mcp\server.js')
+  if ($LASTEXITCODE -eq 0) {
+    Write-Host '  reiniciar Claude Code para que tome el MCP' -ForegroundColor DarkGray
+  } else {
+    Write-Host 'MCP bwx-gx-bridge: no pude registrarlo (ver mensaje arriba).' -ForegroundColor Yellow
+  }
+  if (-not (Test-Path (Join-Path $gxDir 'Packages\Bwx.GxBridge.dll'))) {
+    Write-Host '  falta la extension del IDE. Con GeneXus cerrado, en un PowerShell como administrador:' -ForegroundColor Yellow
+    Write-Host "    & '$bridgeScript'" -ForegroundColor Yellow
+  }
+}
+
+Write-Host ''
+Write-Host 'Listo. En Claude Code pedi: "BWX revisar commits" o "BWX editar" un objeto' -ForegroundColor Cyan
 Write-Host "Para actualizar mas adelante, volve a correr:  $(Join-Path $root 'install.ps1')" -ForegroundColor DarkGray
