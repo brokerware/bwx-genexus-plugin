@@ -44,6 +44,29 @@ const TOOLS = [
     },
   },
   {
+    name: 'gx_history',
+    description:
+      'Historial de commits del GeneXus Server, como Team Development > History: numero, fecha, usuario, ' +
+      'comentario y objetos de cada commit. Solo lectura; usa la conexion al server que ya tiene el IDE. ' +
+      'Recorre las paginas del server del commit mas nuevo hacia atras hasta pasar "from".',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        version: { type: 'string', description: 'Version de la KB (ej. Testing). Por defecto la del modelo abierto.' },
+        from: { type: 'string', description: 'Fecha minima, yyyy-MM-dd (inclusive)' },
+        to: { type: 'string', description: 'Fecha maxima, yyyy-MM-dd (inclusive)' },
+        query: { type: 'string', description: 'Texto del buscador de History (opcional)' },
+        page: { type: 'integer', description: 'Leer solo esta pagina del server (diagnostico)' },
+        first_page: { type: 'integer', description: 'Primera pagina a pedir (por defecto 1)' },
+        max_pages: { type: 'integer', description: 'Tope de paginas a recorrer (por defecto 40)' },
+        out_file: {
+          type: 'string',
+          description: 'Ruta absoluta donde guardar el resultado completo en JSON. Devuelve solo el resumen.',
+        },
+      },
+    },
+  },
+  {
     name: 'gx_set_source',
     description:
       'Reemplaza el fuente completo de una parte y guarda el objeto. GeneXus lo valida antes de guardar: ' +
@@ -148,6 +171,13 @@ async function runTool(name, a) {
       return call('GET', '/status');
     case 'gx_get_object':
       return call('GET', `/object?name=${q(a.name)}${a.type ? `&type=${q(a.type)}` : ''}`);
+    case 'gx_history': {
+      const params = [
+        ['version', a.version], ['from', a.from], ['to', a.to], ['query', a.query],
+        ['page', a.page], ['firstPage', a.first_page], ['maxPages', a.max_pages],
+      ].filter(([, v]) => v !== undefined && v !== null && v !== '');
+      return call('GET', '/history' + (params.length ? '?' + params.map(([k, v]) => `${k}=${q(String(v))}`).join('&') : ''));
+    }
     case 'gx_set_source': {
       // Un procedure de miles de lineas no entra comodo como parametro: se puede pasar un archivo.
       if ((a.source === undefined) === (a.source_file === undefined)) throw new Error('indicar source o source_file (uno solo)');
@@ -166,6 +196,7 @@ async function runTool(name, a) {
 // Presenta el objeto como texto legible: el fuente sin escapar es mucho mas facil de editar.
 function render(name, res, args) {
   const b = res.body;
+  if (name === 'gx_history' && res.status === 200) return renderHistory(b, args);
   if (name !== 'gx_get_object' || res.status !== 200) return JSON.stringify(b, null, 2);
   if (args && args.out_dir) return saveObject(b, args.out_dir);
   const out = [`${b.type} ${b.name}  (modificado ${b.lastUpdate})`, ''];
@@ -175,6 +206,28 @@ function render(name, res, args) {
   }
   if (b.variables) {
     out.push(`===== variables   hash: ${b.variablesHash}`, JSON.stringify(b.variables, null, 1));
+  }
+  return out.join('\n');
+}
+
+// Un commit por bloque: cabecera, comentario y sus objetos. Con out_file guarda el JSON completo.
+function renderHistory(b, args) {
+  const head =
+    `version ${b.version}  desde ${b.from || '-'} hasta ${b.to || '-'}  ` +
+    `${b.count} commits, ${b.pagesRead} paginas leidas, ` +
+    (b.complete ? 'completo' : `INCOMPLETO (el commit mas viejo leido es del ${b.oldestSeen}; subir max_pages)`);
+  if (args && args.out_file) {
+    if (!path.isAbsolute(args.out_file)) throw new Error('out_file tiene que ser una ruta absoluta');
+    fs.mkdirSync(path.dirname(args.out_file), { recursive: true });
+    fs.writeFileSync(args.out_file, JSON.stringify(b, null, 1), 'utf8');
+    return `${head}\n-> ${args.out_file}`;
+  }
+  const out = [head, ''];
+  for (const r of b.revisions) {
+    out.push(`#${r.id}  ${r.date}  ${r.user}${r.disabled ? '  (deshabilitado)' : ''}`);
+    out.push(`  ${(r.comment || '').replace(/\r?\n/g, '\n  ')}`);
+    for (const o of r.objects) out.push(`    - ${o.name} (${o.type}) ${o.operation}`);
+    out.push('');
   }
   return out.join('\n');
 }
@@ -214,7 +267,7 @@ async function handle(msg) {
         result = {
           protocolVersion: (params && params.protocolVersion) || PROTOCOL,
           capabilities: { tools: {} },
-          serverInfo: { name: 'bwx-gx-bridge', version: '0.3.0' },
+          serverInfo: { name: 'bwx-gx-bridge', version: '0.4.0' },
         };
         break;
       case 'ping':
