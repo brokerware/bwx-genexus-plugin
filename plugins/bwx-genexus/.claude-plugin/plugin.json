@@ -1,7 +1,7 @@
 {
   "name": "bwx-genexus",
   "description": "Revision de commits de GeneXus leyendo la base SQL de la KB, y edicion de objetos a traves del IDE abierto (MCP bwx-gx-bridge).",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Brokerware"
   }
