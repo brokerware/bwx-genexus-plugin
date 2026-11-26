@@ -65,6 +65,8 @@ Una hoja **Commits** con una fila por commit, ordenada del mas nuevo al mas viej
 | Evidencia xcale | `archivo:linea` que lo confirma o donde falta |
 | Impacto | Alto (plata o contabilidad) / Medio (dato o flujo incorrecto) / Bajo (cosmetico o borde) |
 | Plataformas afectadas | Que apps de xcale usan ese codigo (ver Paso 5) |
+| Cambios en front (bx-*) | Ramas o PRs de los repos `bx-*` que acompanan al commit, con "Si" o "Posible" (ver Paso 6) |
+| Tipo / Documento de prueba | Solo si hay Trello conectado: bug, mejora o desarrollo, y el "Como probarlo" de la tarjeta (ver Paso 6) |
 | Notas | Lo que no se pudo verificar, diffs mezclados, autor a confirmar |
 
 Mas una hoja **Resumen** por mes (`COUNTIFS` sobre Mes, Toca la plataforma y Esta en xcale) y una
@@ -145,7 +147,43 @@ avisen a nosotros). Para cada commit:
 Escribilo como lista corta: `Backoffice (Ops), Advisor, Trader`. Si es una estimacion por
 modulo y no se verifico pantalla por pantalla, decilo en la Leyenda.
 
-## Paso 6: reportar
+## Paso 6: el resto del cambio (front y Trello)
+
+Un commit de GeneXus muchas veces viene con cambios en los repos `bx-*` (bx-react-ui,
+bx-api, bx-backoffice, bx-advisor-client, ...). Si el back esta en xcale pero el front no,
+el cambio sigue incompleto.
+
+**GitHub (siempre).** Los repos `bx-*` estan en la org de GitHub; se buscan sin clonarlos:
+
+```bash
+gh search commits --owner <org> "<ticket>" --json repository,commit,url
+gh search prs     --owner <org> "<ticket>" --json repository,number,title,url
+gh search commits --owner <org> --author <login> --author-date 2026-08-01..2026-11-30 --json repository,commit,url
+```
+
+- Quedate con los repos que empiezan con `bx`.
+- El numero de ticket suele estar en el **nombre de la rama**, y queda en el mensaje del
+  merge ("Merge branch '664277-Front-prod' into 'prod'"). El que mergea no es
+  necesariamente el autor.
+- Para los commits sin ticket: trae los commits de cada integrante en los `bx-*` del
+  periodo (una busqueda por autor y rango, no una por commit) y cruzalos por fecha cercana
+  y tema ("fix(collateral): validacion de maturity" con "Fix vencimiento de collaterals").
+  Los logins salen de `gh api orgs/<org>/members`.
+- Marca **Si** cuando coincide el ticket o el tema es inequivoco, y **Posible** cuando solo
+  coinciden la epoca y el tema. Que no aparezca no prueba que no hubo front: hay commits
+  firmados con mails no vinculados a GitHub.
+- La busqueda de GitHub limita a ~30 consultas por minuto: espera 2-3 s entre consultas.
+
+**Trello (si esta conectado el conector de Trello).** Las tarjetas se crean por proyecto
+(una para el commit de GeneXus, otra por cada MR de `bx-*`) y se linkean entre si. Para cada
+commit: busca la tarjeta por numero de commit ("Commit 5885") o de ticket, segui los links a
+las tarjetas de los otros proyectos, y toma de la descripcion el tipo (bug, mejora o
+desarrollo) y el "Como probarlo" como documento de prueba. El conector se autoriza por
+espacio de trabajo: si no aparece ninguno, el usuario es invitado del tablero y no miembro
+del Workspace, y tiene que pedir que lo agreguen. Sin Trello, el resto del flujo funciona
+igual.
+
+## Paso 7: reportar
 
 Al cerrar cada periodo: una tabla corta con cada commit, que hace y si esta. Al final, el
 total por estado y la lista de **fixes perdidos ordenada por impacto**: es lo primero que

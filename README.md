@@ -158,7 +158,9 @@ donde guardar el Excel. Despues:
 2. Saca el diff de cada commit de la base de la KB, con el script de `revisar-commits`.
 3. Lo compara contra el codigo de xcale y marca cada commit: esta, parcial, fix perdido,
    funcionalidad todavia no migrada o a revisar, con `archivo:linea` como evidencia.
-4. Anota que plataformas de xcale usan ese codigo (Backoffice, Advisor, Trader, Portal...),
+4. Anota que plataformas de xcale usan ese codigo (Backoffice, Advisor, Trader, Portal...)
+   y que cambios de front (repos `bx-*` en GitHub, y tarjetas de Trello si esta conectado)
+   vinieron con el commit,
    para avisarle al equipo que corresponda.
 
 No hace Update ni Commit, no escribe en la KB y no toca xcale. El detalle del metodo y sus
