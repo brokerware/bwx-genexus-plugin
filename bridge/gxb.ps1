@@ -5,18 +5,27 @@
     gxb.ps1 status
     gxb.ps1 get  -Name ZZBridgeTest [-Type Procedure] [-OutDir dir]
     gxb.ps1 set  -Name ZZBridgeTest -Part Procedure -File nuevo.gx [-ExpectedHash h]
+    gxb.ps1 history [-Version Testing] [-From 2026-10-26] [-To 2026-11-26] [-Page n] [-OutFile f.json]
 
   get guarda cada parte de fuente en <OutDir>\<Name>.<Parte>.gx e imprime su hash;
   set envia ese hash para que el bridge rechace el cambio si alguien edito en el medio.
+  history lee los commits del GeneXus Server (Team Development > History), solo lectura.
 #>
 param(
-  [Parameter(Position = 0, Mandatory)][ValidateSet('ping', 'status', 'get', 'set')][string]$Action,
+  [Parameter(Position = 0, Mandatory)][ValidateSet('ping', 'status', 'get', 'set', 'history')][string]$Action,
   [string]$Name,
   [string]$Type,
   [string]$Part,
   [string]$File,
   [string]$ExpectedHash,
-  [string]$OutDir = '.'
+  [string]$OutDir = '.',
+  [string]$Version,
+  [string]$From,
+  [string]$To,
+  [string]$Query,
+  [int]$Page = -1,
+  [int]$MaxPages = 0,
+  [string]$OutFile
 )
 $ErrorActionPreference = 'Stop'
 
@@ -42,6 +51,7 @@ function Invoke-Bridge([string]$Method, [string]$Path, $Body) {
     $text = $_.ErrorDetails.Message
     Write-Host "HTTP $([int]$resp.StatusCode)" -ForegroundColor Red
   }
+  if ($script:RawJson) { return $text }
   $text | ConvertFrom-Json
 }
 
@@ -66,5 +76,30 @@ switch ($Action) {
   'set' {
     $src = [IO.File]::ReadAllText((Resolve-Path $File))
     Invoke-Bridge POST '/source' @{ name = $Name; type = $Type; part = $Part; source = $src; expectedHash = $ExpectedHash } | Format-List
+  }
+  'history' {
+    $qs = @()
+    foreach ($kv in @(@('version', $Version), @('from', $From), @('to', $To), @('query', $Query))) {
+      if ($kv[1]) { $qs += "$($kv[0])=$([Uri]::EscapeDataString($kv[1]))" }
+    }
+    if ($Page -ge 0) { $qs += "page=$Page" }
+    if ($MaxPages -gt 0) { $qs += "maxPages=$MaxPages" }
+    $path = '/history' + $(if ($qs) { '?' + ($qs -join '&') } else { '' })
+    if ($OutFile) {
+      $script:RawJson = $true
+      $json = Invoke-Bridge GET $path $null
+      [IO.File]::WriteAllText($OutFile, $json, (New-Object Text.UTF8Encoding $false))
+      $h = $json | ConvertFrom-Json
+      "$($h.count) commits, $($h.pagesRead) paginas, completo=$($h.complete) -> $OutFile"
+      return
+    }
+    $h = Invoke-Bridge GET $path $null
+    if ($h.error) { $h; return }
+    "version $($h.version): $($h.count) commits, $($h.pagesRead) paginas, completo=$($h.complete)"
+    foreach ($r in $h.revisions) {
+      "#$($r.id)  $($r.date)  $($r.user)"
+      "  $($r.comment)"
+      foreach ($o in $r.objects) { "    - $($o.name) ($($o.type)) $($o.operation)" }
+    }
   }
 }

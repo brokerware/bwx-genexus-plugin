@@ -11,7 +11,7 @@
     <RootNamespace>Bwx.GxBridge</RootNamespace>
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
     <GxDir Condition="'$(GxDir)' == ''">C:\Program Files (x86)\GeneXus\GeneXus18</GxDir>
   </PropertyGroup>
 

@@ -25,6 +25,8 @@ namespace Bwx.GxBridge
                 case "GET /ping": return new { ok = true, version = typeof(Router).Assembly.GetName().Version.ToString() };
                 case "GET /status": return OnUi(Status);
                 case "GET /object": return OnUi(() => ReadObject(req.Param("name"), req.Param("type")));
+                // Pagina contra el server: cada pagina pasa por el hilo de UI por separado.
+                case "GET /history": return History.Read(req);
                 case "POST /source":
                     var input = BridgeServer.Deserialize<WriteSourceRequest>(req.Body);
                     return OnUi(() => WriteSource(input));

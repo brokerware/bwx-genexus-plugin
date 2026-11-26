@@ -220,6 +220,7 @@ Herramientas del MCP:
 |---|---|
 | `gx_status` | KB abierta, modelo, version del bridge y `WritePrefixes` |
 | `gx_get_object` | Fuente de cada parte con su hash, y variables con su hash. Con `out_dir` guarda las partes en archivos (`<Nombre>.<Parte>.gx`) y devuelve solo hashes y rutas: es lo que se usa con objetos grandes |
+| `gx_history` | Commits del GeneXus Server, como Team Development > History: numero, fecha, usuario, comentario y objetos de cada uno. Filtra por `version` y por `from`/`to` (yyyy-MM-dd). Solo lectura: usa la conexion al server que ya tiene el IDE. Con `out_file` guarda el JSON completo |
 | `gx_set_source` | Reemplaza el fuente completo de una parte y guarda. El fuente va en `source` o, para objetos grandes, en un archivo (`source_file`). Requiere el hash leido |
 | `gx_set_variables` | Agrega, modifica o borra variables. Tipo por atributo, dominio, `customType` (SDT/BC/externos) o `dataType` + `length` + `decimals` |
 
@@ -233,6 +234,7 @@ $g = "$env:LOCALAPPDATA\bwx-genexus-plugin\bridge\gxb.ps1"
 & $g status
 & $g get -Name ZZBridgeTest -OutDir "$env:TEMP\gx"
 & $g set -Name ZZBridgeTest -Part Procedure -File "$env:TEMP\gx\ZZBridgeTest.Procedure.gx" -ExpectedHash <hash>
+& $g history -Version Testing -From 2026-10-26 -To 2026-11-26 -OutFile "$env:TEMP\gx\history.json"
 ```
 
 ### Si algo falla
