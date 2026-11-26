@@ -1,12 +1,17 @@
 # bwx-genexus
 
-GeneXus desde Claude Code. Dos funcionalidades independientes:
+GeneXus desde Claude Code. Tres funcionalidades independientes:
 
 - **Revision de commits** (`BWX revisar commits`). Saca los diffs reales de los objetos
   de una KB y audita el objeto completo antes de subirlo a GXserver. Solo lectura.
 - **Edicion de objetos** (`BWX editar`). Lee y modifica objetos de la KB abierta en el
   IDE, a traves de una extension de GeneXus 18 y el servidor MCP `bwx-gx-bridge`. Ver
   [Editar objetos](#editar-objetos-bwx-gx-bridge).
+- **Comparar con xcale** (`BWX comparar con xcale`). Para el pasaje del legacy a xcale:
+  trae los commits de un equipo del GeneXus Server, saca el diff de cada uno y lo compara
+  contra una rama de xcale. Arma un Excel con lo que esta, lo que esta a medias, los fixes
+  perdidos y las plataformas que toca cada cambio. Solo lectura. Ver
+  [Comparar con xcale](#comparar-con-xcale).
 
 ## Revision de commits
 
@@ -135,6 +140,30 @@ $s = "$env:USERPROFILE\.claude\plugins\...\gx-kb.ps1"
   **requiere la KB cerrada**.
 - **La parte `Variables` se colapsa a una linea por variable**, ordenada. En crudo son 30 KB
   de XML por procedure y el diff es inservible.
+
+## Comparar con xcale
+
+Para que ningun cambio del legacy se pierda en el pasaje a xcale: cada equipo revisa los
+commits que hizo en GeneXus y verifica si estan en xcale.
+
+```
+BWX comparar con xcale
+```
+
+Claude pregunta las firmas del equipo (el autor sale del comentario del commit: el
+usuario del server es siempre `Local\gxuser`), el periodo, el repo y la rama de xcale, y
+donde guardar el Excel. Despues:
+
+1. Trae el historial con `gx_history` (necesita el bridge 0.3.0 y GeneXus abierto).
+2. Saca el diff de cada commit de la base de la KB, con el script de `revisar-commits`.
+3. Lo compara contra el codigo de xcale y marca cada commit: esta, parcial, fix perdido,
+   funcionalidad todavia no migrada o a revisar, con `archivo:linea` como evidencia.
+4. Anota que plataformas de xcale usan ese codigo (Backoffice, Advisor, Trader, Portal...),
+   para avisarle al equipo que corresponda.
+
+No hace Update ni Commit, no escribe en la KB y no toca xcale. El detalle del metodo y sus
+trampas (versiones que mezclan commits, diffs que la KB no guarda) esta en el skill
+`comparar-con-xcale`.
 
 ## Editar objetos (bwx-gx-bridge)
 
